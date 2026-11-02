@@ -65,6 +65,7 @@ type RequestOptions = {
   method?: "GET" | "POST";
   params?: QueryParams;
   body?: unknown;
+  headers?: Record<string, string>;
   signal: AbortSignal;
 };
 
@@ -106,13 +107,13 @@ type RawResponse = {
 
 async function sendRequest(
   url: string,
-  { method = "GET", body, signal }: RequestOptions,
+  { method = "GET", body, headers, signal }: RequestOptions,
 ): Promise<RawResponse> {
   const timeoutSignal = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
   try {
     const response = await fetch(url, {
       method,
-      headers: buildHeaders(body),
+      headers: buildHeaders(body, headers),
       body: stringifyBody(body),
       signal: AbortSignal.any([signal, timeoutSignal]),
     });
@@ -134,8 +135,11 @@ async function sendRequest(
   }
 }
 
-function buildHeaders(body: unknown): Headers {
-  const headers = new Headers({ Accept: "application/json" });
+function buildHeaders(
+  body: unknown,
+  extraHeaders: Record<string, string> = {},
+): Headers {
+  const headers = new Headers({ Accept: "application/json", ...extraHeaders });
   if (body !== undefined) {
     headers.set("Content-Type", "application/json");
   }
