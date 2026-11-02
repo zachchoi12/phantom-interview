@@ -5,6 +5,7 @@ import { config } from "@/config";
 
 const TOKEN_DATA_URL = `${config.phantomApiBaseUrl}/token-data`;
 const UNSIGNED_DECIMAL_PATTERN = /^\d+(\.\d+)?$/;
+const ZERO_AMOUNT_PATTERN = /^0+(\.0+)?$/;
 
 const walletTokenSchema = z.object({
   mintAddress: z.string(),
@@ -16,12 +17,19 @@ const walletTokenSchema = z.object({
   imageUrl: z.string().optional(),
 });
 
+export type WalletToken = z.infer<typeof walletTokenSchema>;
+
 const walletTokensPageSchema = z.object({
   page: z.number().int(),
   perPage: z.number().int(),
   total: z.number().int(),
-  records: z.array(walletTokenSchema),
+  records: z.array(walletTokenSchema).transform(dropZeroBalances),
 });
+
+// Pages can come back shorter than perPage; page, perPage, and total still count the dropped records.
+function dropZeroBalances(tokens: WalletToken[]): WalletToken[] {
+  return tokens.filter((token) => !ZERO_AMOUNT_PATTERN.test(token.amount));
+}
 
 type WalletTokensPage = z.infer<typeof walletTokensPageSchema>;
 

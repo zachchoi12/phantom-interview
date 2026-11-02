@@ -8,8 +8,10 @@ const MAX_MINTS_PER_REQUEST = 100;
 
 const tokenPriceSchema = z.object({
   value: z.number(),
-  priceChange24h: z.number(),
+  priceChange24h: z.number().nullable(),
 });
+
+export type TokenPrice = z.infer<typeof tokenPriceSchema>;
 
 // Keyed by mint; a mint Birdeye can't price maps to null.
 const multiPriceResponseSchema = z
@@ -18,7 +20,7 @@ const multiPriceResponseSchema = z
   })
   .transform((response) => response.data);
 
-type TokenPrices = z.infer<typeof multiPriceResponseSchema>;
+export type TokenPrices = z.infer<typeof multiPriceResponseSchema>;
 
 export async function getTokenPrices(
   mints: string[],

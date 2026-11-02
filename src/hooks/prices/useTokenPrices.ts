@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { getTokenPrices } from "@/api/prices";
 import { isSolanaAddress } from "@/lib/address";
@@ -14,6 +14,7 @@ export function useTokenPrices(mints: string[]) {
     queryKey: [QUERY_KEY, priceableMints],
     queryFn: ({ signal }) => getTokenPrices(priceableMints, signal),
     enabled: priceableMints.length > 0,
+    placeholderData: keepPreviousData,
     staleTime: STALE_TIME_MS,
     gcTime: GC_TIME_MS,
     refetchInterval: REFETCH_INTERVAL_MS,

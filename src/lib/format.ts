@@ -21,6 +21,12 @@ const subDollarFormatter = new Intl.NumberFormat(LOCALE, {
   currency: "USD",
   maximumFractionDigits: 4,
 });
+const percentChangeFormatter = new Intl.NumberFormat(LOCALE, {
+  style: "percent",
+  signDisplay: "exceptZero",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 const compactUsdFormatter = new Intl.NumberFormat(LOCALE, {
   style: "currency",
   currency: "USD",
@@ -84,6 +90,13 @@ function toSubscript(value: number): string {
     return SUBSCRIPT_DIGITS.charAt(Number(digit));
   });
   return subscriptDigits.join("");
+}
+
+/**
+ * Formats a change given in percent units with its sign, e.g. `-2.7227` → `"-2.72%"`.
+ */
+export function formatPercentChange(percent: number): string {
+  return percentChangeFormatter.format(percent / 100);
 }
 
 /**

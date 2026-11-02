@@ -4,7 +4,7 @@ import { getWalletTokens } from "@/api/tokens";
 
 const QUERY_KEY = "tokens";
 const FIRST_PAGE = 1;
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 200;
 const STALE_TIME_MS = 60_000;
 const GC_TIME_MS = 5 * 60_000;
 
