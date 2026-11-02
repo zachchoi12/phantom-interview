@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next.js Starter
 
-## Getting Started
-
-First, run the development server:
+Next.js 15 + React 19 + TypeScript starter with typed data fetching, `bigint` token amounts, and shadcn/ui. Working conventions live in `CLAUDE.md`, with ESLint and Prettier enforcing the mechanical ones.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
+npm install
+npm run dev     # http://localhost:3000
+npm run check   # typecheck + lint + format check
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Project structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+.
+├── src/
+│   ├── app/                  # Next.js pages (thin server components)
+│   ├── api/                  # client.ts, schemas.ts, one <domain>.ts per API
+│   ├── components/
+│   │   ├── ui/               # shadcn primitives
+│   │   ├── shared/           # Components used by multiple features
+│   │   └── modules/          # One folder per feature
+│   │       └── <feature>/
+│   │           └── hooks/    # Hooks used only by this feature
+│   ├── hooks/                # Generic hooks; <domain>/useX.ts for React Query
+│   ├── lib/                  # amount, format, query-client, utils
+│   ├── providers/            # React Query, tooltip, toaster
+│   ├── stores/               # zustand stores, one per domain
+│   └── config.ts             # Parsed NEXT_PUBLIC_* env vars
+├── .env.example              # Environment variables example
+├── CLAUDE.md                 # Code conventions
+├── components.json           # shadcn config
+├── eslint.config.mjs         # Lint rules
+└── ...
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Config
 
-## Learn More
+`config.ts`: parses `NEXT_PUBLIC_*` env vars with zod at startup, so a bad base URL fails immediately instead of at the first request
 
-To learn more about Next.js, take a look at the following resources:
+| Var                        | Default             | Use                            |
+| -------------------------- | ------------------- | ------------------------------ |
+| `NEXT_PUBLIC_API_BASE_URL` | empty (same origin) | Base URL for the app's own API |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API client
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+`client.ts`: `fetch` wrapper with zod schema validation, a typed `ApiError`, and timeouts
 
-## Deploy on Vercel
+```ts
+const PRICES_URL = `${config.apiBaseUrl}/prices`;
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+const priceSchema = z.object({
+  mint: z.string(),
+  priceUsd: z.number().nullable(),
+});
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+export type Price = z.infer<typeof priceSchema>;
+
+export function getPrice(mint: string, signal: AbortSignal): Promise<Price> {
+  const endpoint = PRICES_URL;
+  return apiFetch(endpoint, priceSchema, { params: { mint }, signal });
+}
+```
+
+## React Query
+
+`query-client.ts`: shared `QueryClient` with these defaults:
+
+- `staleTime` of 30s
+- Retries only retryable `ApiError`s, up to 3 times
+- Retry delay uses `Retry-After` when sent, otherwise full-jitter backoff (1s base, 30s cap)
+- Each query still sets its own `staleTime`, `gcTime`, and `refetchInterval`
+
+## Utilities
+
+`amount.ts`: token amounts (`bigint` base units)
+
+```ts
+toBaseUnits("1.5", 9);              // Parse user input into base units
+formatAmount(1_234_567_891n, 9);    // Show a token amount
+toUiAmount(1_500_000_000n, 9);      // Get a number for USD math
+```
+
+`format.ts`: USD and addresses
+
+```ts
+formatUsd(1234.5);                  // Show a USD value
+formatPrice(0.00000279);            // Show a token's USD price
+shortenAddress(address);            // Show an address as 7xKX…gAsU
+```
