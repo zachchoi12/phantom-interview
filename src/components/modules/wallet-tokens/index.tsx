@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 
+import { PortfolioSummarySkeleton } from "@/components/modules/wallet-tokens/PortfolioSummary";
 import { TokenList } from "@/components/modules/wallet-tokens/TokenList";
 import { TokenRowSkeleton } from "@/components/modules/wallet-tokens/TokenRowSkeleton";
 import {
@@ -42,10 +43,13 @@ export function WalletTokens({ publicKey }: WalletTokensProps) {
   switch (tokensQuery.status) {
     case "pending": {
       return (
-        <div className="flex min-h-0 flex-1 flex-col">
-          {SKELETON_ROW_KEYS.map((key) => (
-            <TokenRowSkeleton key={key} />
-          ))}
+        <div className="flex min-h-0 flex-1 flex-col gap-2">
+          <PortfolioSummarySkeleton />
+          <div className="min-h-0 flex-1 overflow-hidden">
+            {SKELETON_ROW_KEYS.map((key) => (
+              <TokenRowSkeleton key={key} />
+            ))}
+          </div>
         </div>
       );
     }

@@ -21,6 +21,11 @@ const subDollarFormatter = new Intl.NumberFormat(LOCALE, {
   currency: "USD",
   maximumFractionDigits: 4,
 });
+const usdChangeFormatter = new Intl.NumberFormat(LOCALE, {
+  style: "currency",
+  currency: "USD",
+  signDisplay: "exceptZero",
+});
 const percentChangeFormatter = new Intl.NumberFormat(LOCALE, {
   style: "percent",
   signDisplay: "exceptZero",
@@ -90,6 +95,13 @@ function toSubscript(value: number): string {
     return SUBSCRIPT_DIGITS.charAt(Number(digit));
   });
   return subscriptDigits.join("");
+}
+
+/**
+ * Formats a USD change with its sign, e.g. `"+$1.23"` or `"-$0.50"`.
+ */
+export function formatUsdChange(value: number): string {
+  return usdChangeFormatter.format(value);
 }
 
 /**

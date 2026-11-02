@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 
 import type { TokenPrices } from "@/api/prices";
 import type { WalletToken } from "@/api/tokens";
+import { PortfolioSummary } from "@/components/modules/wallet-tokens/PortfolioSummary";
 import {
   TokenRow,
   type TokenRowPrice,
@@ -47,6 +48,7 @@ export function TokenList({ tokens, onNearEnd }: TokenListProps) {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
+      <PortfolioSummary tokens={tokens} />
       {pricesQuery.isError && (
         <Alert variant="destructive">
           <AlertTitle>Couldn&apos;t load prices</AlertTitle>
