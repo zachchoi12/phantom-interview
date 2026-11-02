@@ -38,9 +38,12 @@ npm run check   # typecheck + lint + format check
 
 `config.ts`: parses `NEXT_PUBLIC_*` env vars with zod at startup, so a bad base URL fails immediately instead of at the first request
 
-| Var                        | Default             | Use                            |
-| -------------------------- | ------------------- | ------------------------------ |
-| `NEXT_PUBLIC_API_BASE_URL` | empty (same origin) | Base URL for the app's own API |
+| Var                                | Default             | Use                                      |
+| ---------------------------------- | ------------------- | ---------------------------------------- |
+| `NEXT_PUBLIC_API_BASE_URL`         | empty (same origin) | Base URL for the app's own API           |
+| `NEXT_PUBLIC_PHANTOM_API_BASE_URL` | required            | Phantom API base URL (wallet token data) |
+| `NEXT_PUBLIC_BIRDEYE_API_BASE_URL` | required            | Birdeye API base URL (token prices)      |
+| `NEXT_PUBLIC_BIRDEYE_API_KEY`      | required            | Birdeye API key, sent as `X-API-KEY`     |
 
 ## API client
 
